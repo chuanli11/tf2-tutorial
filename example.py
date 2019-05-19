@@ -1,3 +1,4 @@
+
 import  os
 import  tensorflow as tf
 from    tensorflow import  keras
@@ -28,6 +29,8 @@ parser.add_argument('--bs_per_gpu', type=int, default=256,
                             help="Batch size on each GPU.")
 parser.add_argument('--num_epochs', type=int, default=3,
                             help="Number of training epochs.")
+parser.add_argument('--num_train_samples', type=int, default=40000,
+                            help="Number of training samples.")
 
 args = parser.parse_args()
 
@@ -61,11 +64,19 @@ def main():
     (x,y), (x_test, y_test) = datasets.cifar10.load_data()
     x, x_test = normalize(x, x_test)
 
+    x_val = x[args.num_train_samples:, :]
+    y_val = y[args.num_train_samples:, :]
+
+    x = x[:args.num_train_samples, :]
+    y = y[:args.num_train_samples, :]
+
     train_loader = tf.data.Dataset.from_tensor_slices((x,y))
+    val_loader = tf.data.Dataset.from_tensor_slices((x_val, y_val))
     test_loader = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
-    train_loader = train_loader.map(prepare_cifar).shuffle(50000).batch(args.bs_per_gpu * args.num_gpus)
-    test_loader = test_loader.map(prepare_cifar).shuffle(10000).batch(args.bs_per_gpu * args.num_gpus)      
+    train_loader = train_loader.map(prepare_cifar).shuffle(args.num_train_samples).batch(args.bs_per_gpu * args.num_gpus)
+    val_loader = val_loader.map(prepare_cifar).batch(args.bs_per_gpu * args.num_gpus)
+    test_loader = test_loader.map(prepare_cifar).batch(args.bs_per_gpu * args.num_gpus)      
 
 
     if args.num_gpus == 1:
@@ -84,8 +95,11 @@ def main():
                       loss=keras.losses.SparseCategoricalCrossentropy(),
                       metrics=['accuracy'])   
 
-    model.fit(train_loader, epochs=args.num_epochs)
-    model.evaluate(train_loader)
+    model.fit(train_loader,
+              epochs=args.num_epochs,
+              validation_data=val_loader,
+              validation_freq=1)
+    model.evaluate(test_loader)
 
 
 if __name__ == '__main__':
