@@ -5,6 +5,7 @@ from    tensorflow import  keras
 from    tensorflow.keras import datasets, layers, optimizers, models, regularizers
 import  argparse
 import  numpy as np
+import datetime
 
 
 
@@ -42,76 +43,89 @@ def VGG16(input_shape):
 
   model = models.Sequential()
 
+  flag_BN = True
+
   model.add(layers.Conv2D(64, (3, 3), padding='same',
                    input_shape=input_shape, kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
   model.add(layers.Dropout(0.3))
 
   model.add(layers.Conv2D(64, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
-
+  if flag_BN:
+    model.add(layers.BatchNormalization())
   model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
   model.add(layers.Conv2D(128, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
   model.add(layers.Dropout(0.4))
 
   model.add(layers.Conv2D(128, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
 
   model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
   model.add(layers.Conv2D(256, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
   model.add(layers.Dropout(0.4))
 
   model.add(layers.Conv2D(256, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
   model.add(layers.Dropout(0.4))
 
   model.add(layers.Conv2D(256, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
+  model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  if flag_BN:
+    model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  if flag_BN:
+    model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  if flag_BN:
+    model.add(layers.BatchNormalization())
 
   model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
 
   model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
   model.add(layers.Dropout(0.4))
 
   model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
   model.add(layers.Dropout(0.4))
 
   model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
-
-  model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-
-
-  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
-  model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
-  model.add(layers.Dropout(0.4))
-
-  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
-  model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
-  model.add(layers.Dropout(0.4))
-
-  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
-  model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
 
   model.add(layers.MaxPooling2D(pool_size=(2, 2)))
   model.add(layers.Dropout(0.5))
@@ -119,7 +133,8 @@ def VGG16(input_shape):
   model.add(layers.Flatten())
   model.add(layers.Dense(512,kernel_regularizer=regularizers.l2(weight_decay)))
   model.add(layers.Activation('relu'))
-  model.add(layers.BatchNormalization())
+  if flag_BN:
+    model.add(layers.BatchNormalization())
 
   model.add(layers.Dropout(0.5))
   model.add(layers.Dense(num_classes))
@@ -188,19 +203,29 @@ def main():
                       loss='sparse_categorical_crossentropy',
                       metrics=['accuracy'])   
 
+    log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(
+      log_dir=log_dir,
+      update_freq=args.bs_per_gpu * args.num_gpus * 10,
+      histogram_freq=1)
+
+
     model.fit(train_loader,
               epochs=args.num_epochs,
               validation_data=val_loader,
-              validation_freq=1)
+              validation_freq=1,
+              callbacks=[tensorboard_callback])
     model.evaluate(test_loader)
 
     # Save & load weights
     # Cannot save model configuration: http://ashokrahulgade.com/coding/keras/Module1.html
     # Save weights to disk
     model.save('model.h5')
-    new_model = keras.models.load_model('model.h5')     
-    new_model.evaluate(test_loader)
 
+    new_model = keras.models.load_model('model.h5')
+    # Result will be slightly different if training uses multiple-gpus
+    # Related to batch normalization layer   
+    new_model.evaluate(test_loader)
 
 if __name__ == '__main__':
     main()
