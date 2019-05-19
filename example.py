@@ -186,6 +186,11 @@ def main():
     val_loader = val_loader.map(prepare_cifar).batch(args.bs_per_gpu * args.num_gpus)
     test_loader = test_loader.map(prepare_cifar).batch(args.bs_per_gpu * args.num_gpus)      
 
+    if False:
+      for xx, yy in train_loader:
+        print(xx.shape)
+        print(yy.shape)
+        break
 
     if args.num_gpus == 1:
         model = VGG16([32, 32, 3])
