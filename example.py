@@ -2,13 +2,13 @@
 import  os
 import  tensorflow as tf
 from    tensorflow import  keras
-from    tensorflow.keras import datasets, layers, optimizers
+from    tensorflow.keras import datasets, layers, optimizers, models, regularizers
 import  argparse
 import  numpy as np
 
 
 
-from network import VGG16
+# from network import VGG16
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # or any {'0', '1', '2'}
 parser = argparse.ArgumentParser()
@@ -33,6 +33,99 @@ parser.add_argument('--num_train_samples', type=int, default=40000,
                             help="Number of training samples.")
 
 args = parser.parse_args()
+
+
+def VGG16(input_shape):
+  # Do not use subclass for easier save/load model and print summary
+  weight_decay = 0.000
+  num_classes = 10
+
+  model = models.Sequential()
+
+  model.add(layers.Conv2D(64, (3, 3), padding='same',
+                   input_shape=input_shape, kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.3))
+
+  model.add(layers.Conv2D(64, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+
+  model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+  model.add(layers.Conv2D(128, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(128, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+
+  model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+  model.add(layers.Conv2D(256, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(256, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(256, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+
+  model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+
+  model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+  model.add(layers.Dropout(0.4))
+
+  model.add(layers.Conv2D(512, (3, 3), padding='same',kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+
+  model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+  model.add(layers.Dropout(0.5))
+
+  model.add(layers.Flatten())
+  model.add(layers.Dense(512,kernel_regularizer=regularizers.l2(weight_decay)))
+  model.add(layers.Activation('relu'))
+  model.add(layers.BatchNormalization())
+
+  model.add(layers.Dropout(0.5))
+  model.add(layers.Dense(num_classes))
+  model.add(layers.Activation('softmax'))  
+
+  return model
 
 def normalize(X_train, X_test):
     # this function normalize inputs for zero mean and unit variance
@@ -83,7 +176,7 @@ def main():
         model = VGG16([32, 32, 3])
         model.compile(
                   optimizer=keras.optimizers.Adam(learning_rate=1e-3),
-                  loss=keras.losses.SparseCategoricalCrossentropy(),
+                  loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])   
 
     else:
@@ -92,7 +185,7 @@ def main():
             model = VGG16([32, 32, 3])
             model.compile(
                       optimizer=keras.optimizers.Adam(learning_rate=1e-3),
-                      loss=keras.losses.SparseCategoricalCrossentropy(),
+                      loss='sparse_categorical_crossentropy',
                       metrics=['accuracy'])   
 
     model.fit(train_loader,
@@ -100,6 +193,13 @@ def main():
               validation_data=val_loader,
               validation_freq=1)
     model.evaluate(test_loader)
+
+    # Save & load weights
+    # Cannot save model configuration: http://ashokrahulgade.com/coding/keras/Module1.html
+    # Save weights to disk
+    model.save('model.h5')
+    new_model = keras.models.load_model('model.h5')     
+    new_model.evaluate(test_loader)
 
 
 if __name__ == '__main__':
