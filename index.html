@@ -1,0 +1,176 @@
+<HTML>
+
+<head>
+    <meta charset="utf-8">
+    <title>GPU Training Leaderboard</title>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles/styles.css') }}">
+
+    <script src="{{ url_for('static',filename='js/data.js') }}"></script>
+
+    <script src="{{ url_for('static',filename='js/leaderboard.js') }}"></script>
+
+    <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-pageLoadMore/1.0.1/js/dataTables.pageLoadMore.min.js"></script>
+</head>
+
+<BODY BGCOLOR="FFFFFF">
+
+<!-- HTML generated using hilite.me -->
+
+
+<div class="filterGroup fontBigger" id="filters">
+</div>
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">tensorflow</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">tf</span>
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">main</span>():
+
+    <span class="codeblock" id="datapipeline">
+    tf<span style="color: #333333">.</span>random<span style="color: #333333">.</span>set_seed(<span style="color: #0000DD; font-weight: bold">22</span>)
+
+    <span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&#39;loading data...&#39;</span>)
+    (x,y), (x_test, y_test) <span style="color: #333333">=</span> datasets<span style="color: #333333">.</span>cifar10<span style="color: #333333">.</span>load_data()
+    x, x_test <span style="color: #333333">=</span> normalize(x, x_test)
+
+    x_val <span style="color: #333333">=</span> x[args<span style="color: #333333">.</span>num_train_samples:, :]
+    y_val <span style="color: #333333">=</span> y[args<span style="color: #333333">.</span>num_train_samples:, :]
+
+    x <span style="color: #333333">=</span> x[:args<span style="color: #333333">.</span>num_train_samples, :]
+    y <span style="color: #333333">=</span> y[:args<span style="color: #333333">.</span>num_train_samples, :]
+
+    train_loader <span style="color: #333333">=</span> tf<span style="color: #333333">.</span>data<span style="color: #333333">.</span>Dataset<span style="color: #333333">.</span>from_tensor_slices((x,y))
+    val_loader <span style="color: #333333">=</span> tf<span style="color: #333333">.</span>data<span style="color: #333333">.</span>Dataset<span style="color: #333333">.</span>from_tensor_slices((x_val, y_val))
+    test_loader <span style="color: #333333">=</span> tf<span style="color: #333333">.</span>data<span style="color: #333333">.</span>Dataset<span style="color: #333333">.</span>from_tensor_slices((x_test, y_test))
+
+    train_loader <span style="color: #333333">=</span> train_loader<span style="color: #333333">.</span>map(prepare_cifar)<span style="color: #333333">.</span>shuffle(args<span style="color: #333333">.</span>num_train_samples)<span style="color: #333333">.</span>batch(args<span style="color: #333333">.</span>bs_per_gpu <span style="color: #333333">*</span> args<span style="color: #333333">.</span>num_gpus)
+    val_loader <span style="color: #333333">=</span> val_loader<span style="color: #333333">.</span>map(prepare_cifar)<span style="color: #333333">.</span>batch(args<span style="color: #333333">.</span>bs_per_gpu <span style="color: #333333">*</span> args<span style="color: #333333">.</span>num_gpus)
+    test_loader <span style="color: #333333">=</span> test_loader<span style="color: #333333">.</span>map(prepare_cifar)<span style="color: #333333">.</span>batch(args<span style="color: #333333">.</span>bs_per_gpu <span style="color: #333333">*</span> args<span style="color: #333333">.</span>num_gpus)</span>     
+
+
+    <span class="codeblock" id="rundata">
+    <span style="color: #008800; font-weight: bold">if</span> <span style="color: #007020">False</span>:
+      <span style="color: #008800; font-weight: bold">for</span> xx, yy <span style="color: #000000; font-weight: bold">in</span> train_loader:
+        <span style="color: #008800; font-weight: bold">print</span>(xx<span style="color: #333333">.</span>shape)
+        <span style="color: #008800; font-weight: bold">print</span>(yy<span style="color: #333333">.</span>shape)
+        <span style="color: #008800; font-weight: bold">break</span></span>
+
+    <span class="codeblock" id="singleGPU">
+    <span style="color: #008800; font-weight: bold">if</span> args<span style="color: #333333">.</span>num_gpus <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">1</span>:
+        model <span style="color: #333333">=</span> VGG16([<span style="color: #0000DD; font-weight: bold">32</span>, <span style="color: #0000DD; font-weight: bold">32</span>, <span style="color: #0000DD; font-weight: bold">3</span>])
+        model<span style="color: #333333">.</span>compile(
+                  optimizer<span style="color: #333333">=</span>keras<span style="color: #333333">.</span>optimizers<span style="color: #333333">.</span>Adam(learning_rate<span style="color: #333333">=</span><span style="color: #6600EE; font-weight: bold">1e-3</span>),
+                  loss<span style="color: #333333">=</span>&#39;sparse_categorical_crossentropy&#39;,
+                  metrics<span style="color: #333333">=</span>[&#39;accuracy&#39;])</span>  
+
+    <span style="color: #008800; font-weight: bold">else</span>:
+        mirrored_strategy <span style="color: #333333">=</span> tf<span style="color: #333333">.</span>distribute<span style="color: #333333">.</span>MirroredStrategy()
+        <span style="color: #008800; font-weight: bold">with</span> mirrored_strategy<span style="color: #333333">.</span>scope():
+            model <span style="color: #333333">=</span> VGG16([<span style="color: #0000DD; font-weight: bold">32</span>, <span style="color: #0000DD; font-weight: bold">32</span>, <span style="color: #0000DD; font-weight: bold">3</span>])
+            model<span style="color: #333333">.</span>compile(
+                      optimizer<span style="color: #333333">=</span>keras<span style="color: #333333">.</span>optimizers<span style="color: #333333">.</span>Adam(learning_rate<span style="color: #333333">=</span><span style="color: #6600EE; font-weight: bold">1e-3</span>),
+                      loss<span style="color: #333333">=</span><span style="background-color: #fff0f0">&#39;sparse_categorical_crossentropy&#39;</span>,
+                      metrics<span style="color: #333333">=</span>[<span style="background-color: #fff0f0">&#39;accuracy&#39;</span>])   
+
+    log_dir<span style="color: #333333">=</span><span style="background-color: #fff0f0">&quot;logs/fit/&quot;</span> <span style="color: #333333">+</span> datetime<span style="color: #333333">.</span>datetime<span style="color: #333333">.</span>now()<span style="color: #333333">.</span>strftime(<span style="background-color: #fff0f0">&quot;%Y%m</span><span style="background-color: #eeeeee">%d</span><span style="background-color: #fff0f0">-%H%M%S&quot;</span>)
+    tensorboard_callback <span style="color: #333333">=</span> tf<span style="color: #333333">.</span>keras<span style="color: #333333">.</span>callbacks<span style="color: #333333">.</span>TensorBoard(
+      log_dir<span style="color: #333333">=</span>log_dir,
+      update_freq<span style="color: #333333">=</span>args<span style="color: #333333">.</span>bs_per_gpu <span style="color: #333333">*</span> args<span style="color: #333333">.</span>num_gpus <span style="color: #333333">*</span> <span style="color: #0000DD; font-weight: bold">10</span>,
+      histogram_freq<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">1</span>)
+
+
+    model<span style="color: #333333">.</span>fit(train_loader,
+              epochs<span style="color: #333333">=</span>args<span style="color: #333333">.</span>num_epochs,
+              validation_data<span style="color: #333333">=</span>val_loader,
+              validation_freq<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">1</span>,
+              callbacks<span style="color: #333333">=</span>[tensorboard_callback])
+    model<span style="color: #333333">.</span>evaluate(test_loader)
+
+    model<span style="color: #333333">.</span>save(<span style="background-color: #fff0f0">&#39;model.h5&#39;</span>)
+
+    new_model <span style="color: #333333">=</span> keras<span style="color: #333333">.</span>models<span style="color: #333333">.</span>load_model(<span style="background-color: #fff0f0">&#39;model.h5&#39;</span>)
+ 
+    new_model<span style="color: #333333">.</span>evaluate(test_loader)
+
+<span style="color: #008800; font-weight: bold">if</span> __name__ <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;__main__&#39;</span>:
+    main()
+</pre></div>
+
+
+
+<script>
+
+    function create_filter(name, items) {
+      // document.getElementById("filters").innerHTML+=
+      content = '<div class="filter">';
+      content += '<div class="filterName">'+name+':</div>'
+      content += '<div class="btn-toolbar btn-group-toggle" data-toggle="buttons">'
+      for (var i = 0; i < items.length; i++){
+        var v = (items[i] == -1)?'All':items[i];
+        if (i == 0){
+          content += '<label class="btn btn-outline-secondary active">'
+          content += '<input class="table_radio" type="radio" name="table_'+name+'" value="'+items[i]+'" autocomplete="off" checked>'+v
+        }
+        else {
+          content += '<label class="btn btn-outline-secondary">'
+          content += '<input class="table_radio" type="radio" name="table_'+name+'" value="'+items[i]+'" autocomplete="off">'+v
+        }
+        content += '</label>'
+      }
+      content += '</div>';
+      content += '</div>';
+      content += '</div>';
+      document.getElementById("filters").innerHTML += content
+    }
+
+
+    function get_filters(){
+      var selected = {};
+      for (var key in def_filters) {
+          if (def_filters.hasOwnProperty(key)) {
+            var v = document.querySelector('input[name="table_'+key+'"]:checked').value;
+            selected[key] = v
+          }
+      }
+      return selected;
+    }
+
+    var def_filters = {"Name": ['datapipeline', "rundata", "singleGPU"]}
+
+
+    for (var key in def_filters) {
+        if (def_filters.hasOwnProperty(key)) {
+          console.log("hsi")
+          create_filter(key, def_filters[key])
+        }
+    }
+
+    var color_default = 'rgb(255,255,255)'
+    var color_selected = 'rgb(254,200,200)'
+
+    $("input.table_radio:radio").change(function(){
+      
+      var spans = document.getElementsByClassName('codeblock');
+      for (var i = 0; i < spans.length; i++) {
+          var span = spans[i];
+              span.style.background = color_default;
+      }   
+
+      console.log(get_filters()['Name'])
+      var span = document.getElementById(get_filters()['Name']);
+      span.style.background = color_selected;         
+    })
+
+</script>
+
+
+</BODY>
+
+</HTML>

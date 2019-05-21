@@ -158,7 +158,6 @@ def normalize(X_train, X_test):
     return X_train, X_test
 
 def prepare_cifar(x, y):
-
     x = tf.cast(x, tf.float32)
     y = tf.cast(y, tf.int32)
     return x, y
@@ -177,6 +176,11 @@ def main():
 
     x = x[:args.num_train_samples, :]
     y = y[:args.num_train_samples, :]
+
+    # print(type(x[0][0][0][0]))
+    # print(type(y[0][0]))
+    # import sys
+    # sys.exit()
 
     train_loader = tf.data.Dataset.from_tensor_slices((x,y))
     val_loader = tf.data.Dataset.from_tensor_slices((x_val, y_val))
