@@ -19,7 +19,10 @@
     <script src="{{ url_for('static',filename='js/leaderboard.js') }}"></script>
 
     <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-pageLoadMore/1.0.1/js/dataTables.pageLoadMore.min.js"></script>
+
 </head>
+
+
 
 <BODY BGCOLOR="FFFFFF">
 
@@ -29,7 +32,12 @@
 <div class="filterGroup fontBigger" id="filters">
 </div>
 
-<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">tensorflow</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">tf</span>
+<button onclick="myFunction()" class="button">Click Here to go </button>
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+  <pre style="margin: 0; line-height: 125%">
+
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">tensorflow</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">tf</span>
 
 <span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">main</span>():
 
@@ -96,16 +104,35 @@
     model<span style="color: #333333">.</span>save(<span style="background-color: #fff0f0">&#39;model.h5&#39;</span>)
 
     new_model <span style="color: #333333">=</span> keras<span style="color: #333333">.</span>models<span style="color: #333333">.</span>load_model(<span style="background-color: #fff0f0">&#39;model.h5&#39;</span>)
- 
-    new_model<span style="color: #333333">.</span>evaluate(test_loader)
+    
+    <span class="codeblock" id="hehe">
+    new_model<span style="color: #333333">.</span>evaluate(test_loader)</span>
 
 <span style="color: #008800; font-weight: bold">if</span> __name__ <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;__main__&#39;</span>:
     main()
-</pre></div>
+</pre>
+</div>
 
+<div id="search_cont">
+  Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has
+  survived not only five centuries
+</div>
 
+<div id="last"> There is hope </div>
 
 <script>
+
+
+    function scrollTo(hash) {
+        location.hash = "#" + hash;
+        console.log(location.hash);
+    }
+
+    function jump(h){
+        var url = location.href;               //Save down the URL without hash.
+        location.href = "#"+h;                 //Go to the target element.
+        history.replaceState(null,null,url);   //Don't like hashes. Changing it back.
+    }
 
     function create_filter(name, items) {
       // document.getElementById("filters").innerHTML+=
@@ -142,18 +169,19 @@
       return selected;
     }
 
-    var def_filters = {"Name": ['datapipeline', "rundata", "singleGPU"]}
+    var def_filters = {"Name": ['datapipeline', "rundata", "singleGPU", "last"]}
 
 
     for (var key in def_filters) {
         if (def_filters.hasOwnProperty(key)) {
-          console.log("hsi")
           create_filter(key, def_filters[key])
         }
     }
 
     var color_default = 'rgb(255,255,255)'
     var color_selected = 'rgb(254,200,200)'
+
+
 
     $("input.table_radio:radio").change(function(){
       
@@ -163,9 +191,11 @@
               span.style.background = color_default;
       }   
 
-      console.log(get_filters()['Name'])
       var span = document.getElementById(get_filters()['Name']);
-      span.style.background = color_selected;         
+      span.style.background = color_selected;
+
+      var target = "#" + get_filters()['Name']
+      $('html, body').animate({scrollTop:$(target).position().top}, 'slow');
     })
 
 </script>
