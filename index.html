@@ -35,8 +35,9 @@
 
     <script type="text/javascript">   
       var def_filters = {
-        "tf2-cifarvgg": ['DataPipeline', "BuildModel", "Multi-GPU", "TensorBoard", "Train", "Evaluate", "SaveRestore"],
-        "another": ['ToBeDone']}
+        "another": ['ToBeDone'],
+        "tf2-cifarvgg": ['DataPipeline', "BuildModel", "Multi-GPU", "TensorBoard", "Train", "Evaluate", "SaveRestore"]
+        }
 
         function get_filters(key){
           console.log("table_"+key)
@@ -47,7 +48,32 @@
       function loadCode(selectObject){
         $("#code").load(selectObject.value + ".html");
         create_filter(selectObject.value, def_filters[selectObject.value])
-        // $("#explaination").load("explaination/" + selectObject.value + ".html");
+
+        $("#explaination").load("explaination/" + document.getElementById("codename").value + ".html");
+
+        $("input.table_radio:radio").change(function(){
+          console.log("Filters are updated")
+          var key = document.getElementById("codename").value
+          
+          var spans = document.getElementsByClassName('codeblock');
+          for (var i = 0; i < spans.length; i++) {
+              var span = spans[i];
+                  span.style.background = color_default;
+          }   
+
+          var key = document.getElementById("codename").value
+          console.log(key)
+          var span = document.getElementById(get_filters(key));
+          console.log(span)
+          span.style.background = color_selected;
+
+          var target = "#" + get_filters(key)
+          // console.log(target)
+          $('html, body').animate({scrollTop:$(target).position().top - 200}, 'slow');
+
+          create_explaination(get_filters(key))
+        })
+
       }
     </script>
 
@@ -59,7 +85,7 @@
 
 <div class="stickytop">
   <select onchange="loadCode(this)" id="codename">
-    <option value="tf2-cifarvgg">Tensorflow 2.0 Basic Training</option>
+    <option value="tf2-cifarvgg">Tensorflow 2.0 Basic Training</option>    
     <option value="another">Another example</option>
   </select>
 
@@ -71,7 +97,6 @@
 </div>
 
 <div class="stickybottom" id="explaination">
-  <h1>Some explainatoins</h1>
 </div>
 
 
@@ -119,9 +144,9 @@
     var color_default = 'rgb(255,255,255)'
     var color_selected = 'rgb(254,200,200)'
 
+    $("#explaination").load("explaination/" + document.getElementById("codename").value + ".html");
 
     $("input.table_radio:radio").change(function(){
-
       console.log("Filters are updated")
       var key = document.getElementById("codename").value
       
