@@ -10,30 +10,37 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/styles.css') }}">
+<!--     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"> -->
+    <!-- <link rel="stylesheet" href="{{ url_for('static',filename='styles/styles.css') }}"> -->
 
-    <script src="{{ url_for('static',filename='js/data.js') }}"></script>
+<!--     <script src="{{ url_for('static',filename='js/data.js') }}"></script>
 
     <script src="{{ url_for('static',filename='js/leaderboard.js') }}"></script>
-
+ -->
     <script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-pageLoadMore/1.0.1/js/dataTables.pageLoadMore.min.js"></script>
 
-</head>
+    <style>
+    div.sticky {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      background-color: white;
+      padding: 10px;
+      font-size: 20px;
+    }
+    </style>
 
+</head>
 
 
 <BODY BGCOLOR="FFFFFF">
 
 <!-- HTML generated using hilite.me -->
-
-
-<div class="filterGroup fontBigger" id="filters">
+<div class="sticky filterGroup fontBigger" id="filters">
 </div>
 
-<button onclick="myFunction()" class="button">Click Here to go </button>
-
+<div id="code">
 <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
   <pre style="margin: 0; line-height: 125%">
 
@@ -105,7 +112,7 @@
 
     new_model <span style="color: #333333">=</span> keras<span style="color: #333333">.</span>models<span style="color: #333333">.</span>load_model(<span style="background-color: #fff0f0">&#39;model.h5&#39;</span>)
     
-    <span class="codeblock" id="hehe">
+    <span class="codeblock" id="last">
     new_model<span style="color: #333333">.</span>evaluate(test_loader)</span>
 
 <span style="color: #008800; font-weight: bold">if</span> __name__ <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;__main__&#39;</span>:
@@ -113,12 +120,7 @@
 </pre>
 </div>
 
-<div id="search_cont">
-  Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has
-  survived not only five centuries
 </div>
-
-<div id="last"> There is hope </div>
 
 <script>
 
@@ -142,8 +144,8 @@
       for (var i = 0; i < items.length; i++){
         var v = (items[i] == -1)?'All':items[i];
         if (i == 0){
-          content += '<label class="btn btn-outline-secondary active">'
-          content += '<input class="table_radio" type="radio" name="table_'+name+'" value="'+items[i]+'" autocomplete="off" checked>'+v
+          content += '<label class="btn btn-outline-secondary">'
+          content += '<input class="table_radio" type="radio" name="table_'+name+'" value="'+items[i]+'" autocomplete="off">'+v
         }
         else {
           content += '<label class="btn btn-outline-secondary">'
@@ -195,7 +197,7 @@
       span.style.background = color_selected;
 
       var target = "#" + get_filters()['Name']
-      $('html, body').animate({scrollTop:$(target).position().top}, 'slow');
+      $('html, body').animate({scrollTop:$(target).position().top - 200}, 'slow');
     })
 
 </script>
