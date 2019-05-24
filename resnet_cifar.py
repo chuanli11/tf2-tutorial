@@ -21,17 +21,6 @@ num_epochs = 20
 epochs_drop = 5.0
 
 
-class LRTensorBoard(TensorBoard):
-    def __init__(self, log_dir, update_freq, histogram_freq):  # add other arguments to __init__ if you need
-        super(LRTensorBoard, self).__init__(log_dir=log_dir,
-        				 update_freq=update_freq,
-        				 histogram_freq=histogram_freq)
-
-    def on_epoch_end(self, epoch, logs=None):
-        logs.update({'lr': self.model.optimizer.lr})
-        super(LRTensorBoard, self).on_epoch_end(epoch, logs)
-        
-
 def preprocess(x, y):
   x = tf.image.per_image_standardization(x)
   return x, y
@@ -55,6 +44,7 @@ def schedule(epoch):
 	drop = 0.5
 	
 	lrate = initial_lrate * math.pow(drop, math.floor((1+epoch)/epochs_drop))
+	tf.summary.scalar('learning rate', data=lrate, step=epoch)
 	return lrate
 
 
@@ -77,7 +67,7 @@ test_loader = test_loader.map(preprocess).batch(bs_per_gpu * num_gpus)
 
 
 if num_gpus == 1:
-    model = resnet.resnet56(classes=num_classes)
+    model = resnet.resnet32(classes=num_classes)
     model.compile(
               optimizer=keras.optimizers.Adam(learning_rate=INIT_LR),
               loss='sparse_categorical_crossentropy',
@@ -85,20 +75,21 @@ if num_gpus == 1:
 else:
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
-	    model = resnet.resnet56(classes=num_classes)
+	    model = resnet.resnet32(classes=num_classes)
 	    model.compile(
 	              optimizer=keras.optimizers.Adam(learning_rate=INIT_LR),
 	              loss='sparse_categorical_crossentropy',
 	              metrics=['accuracy'])  
 
 log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard_callback = LRTensorBoard(
+file_writer = tf.summary.create_file_writer(log_dir + "/metrics")
+file_writer.set_as_default()
+tensorboard_callback = TensorBoard(
   log_dir=log_dir,
   update_freq='batch',
   histogram_freq=1)
 
-lr_schedule_callback = tf.keras.callbacks.LearningRateScheduler(schedule, verbose=0)
-
+lr_schedule_callback = keras.callbacks.LearningRateScheduler(schedule)
 
 model.fit(train_loader,
           epochs=num_epochs,
