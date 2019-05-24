@@ -10,12 +10,16 @@ import resnet
 HEIGHT = 32
 WIDTH = 32
 NUM_CHANNELS = 3
+num_classes = 10
+
+num_gpus = 2
+
 INIT_LR = 1e-3 
 num_train_samples = 40000
-bs_per_gpu = 128
-num_gpus = 1
-num_epochs = 10
-num_classes = 10
+bs_per_gpu = 125
+num_epochs = 20
+epochs_drop = 5.0
+
 
 class LRTensorBoard(TensorBoard):
     def __init__(self, log_dir, update_freq, histogram_freq):  # add other arguments to __init__ if you need
@@ -29,7 +33,7 @@ class LRTensorBoard(TensorBoard):
         
 
 def preprocess(x, y):
-  image = tf.image.per_image_standardization(x)
+  x = tf.image.per_image_standardization(x)
   return x, y
 
 
@@ -49,7 +53,7 @@ def augmentation(x, y):
 def schedule(epoch):
 	initial_lrate = INIT_LR
 	drop = 0.5
-	epochs_drop = 2.0
+	
 	lrate = initial_lrate * math.pow(drop, math.floor((1+epoch)/epochs_drop))
 	return lrate
 
@@ -57,6 +61,7 @@ def schedule(epoch):
 (x,y), (x_test, y_test) = keras.datasets.cifar10.load_data()
 x_val = x[num_train_samples:, :]
 y_val = y[num_train_samples:, :]
+
 
 x = x[:num_train_samples, :]
 y = y[:num_train_samples, :]
@@ -77,6 +82,14 @@ if num_gpus == 1:
               optimizer=keras.optimizers.Adam(learning_rate=INIT_LR),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
+else:
+    mirrored_strategy = tf.distribute.MirroredStrategy()
+    with mirrored_strategy.scope():
+	    model = resnet.resnet56(classes=num_classes)
+	    model.compile(
+	              optimizer=keras.optimizers.Adam(learning_rate=INIT_LR),
+	              loss='sparse_categorical_crossentropy',
+	              metrics=['accuracy'])  
 
 log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = LRTensorBoard(

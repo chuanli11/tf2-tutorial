@@ -10,11 +10,15 @@ from tensorflow.keras.callbacks import TensorBoard
 HEIGHT = 32
 WIDTH = 32
 NUM_CHANNELS = 3
+num_classes = 10
+
+num_gpus = 2
+
 INIT_LR = 1e-3 
 num_train_samples = 40000
-bs_per_gpu = 128
-num_gpus = 1
-num_epochs = 10
+bs_per_gpu = 125
+num_epochs = 20
+epochs_drop = 5.0
 
 class LRTensorBoard(TensorBoard):
     def __init__(self, log_dir, update_freq, histogram_freq):  # add other arguments to __init__ if you need
@@ -28,7 +32,7 @@ class LRTensorBoard(TensorBoard):
         
 
 def preprocess(x, y):
-  image = tf.image.per_image_standardization(x)
+  x = tf.image.per_image_standardization(x)
   return x, y
 
 
@@ -45,13 +49,13 @@ def augmentation(x, y):
     return x, y	
 
 
-def schedule(epoch):
-	initial_lrate = INIT_LR
-	drop = 0.5
-	epochs_drop = 2.0
-	lrate = initial_lrate * math.pow(drop, math.floor((1+epoch)/epochs_drop))
-	return lrate
 
+def schedule(epoch):
+  initial_lrate = INIT_LR
+  drop = 0.5
+  
+  lrate = initial_lrate * math.pow(drop, math.floor((1+epoch)/epochs_drop))
+  return lrate
 
 def VGG16(input_shape):
   # Do not use subclass for easier save/load model and print summary
@@ -183,7 +187,15 @@ if num_gpus == 1:
               optimizer=keras.optimizers.Adam(learning_rate=INIT_LR),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
-
+else:
+    mirrored_strategy = tf.distribute.MirroredStrategy()
+    with mirrored_strategy.scope():
+      model = VGG16([32, 32, 3])
+      model.compile(
+                optimizer=keras.optimizers.Adam(learning_rate=INIT_LR),
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy']) 
+      
 log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = LRTensorBoard(
   log_dir=log_dir,
