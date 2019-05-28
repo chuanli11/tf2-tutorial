@@ -22,7 +22,6 @@ num_epochs = 10
 
 BASE_LEARNING_RATE = 0.1
 LR_SCHEDULE = [(0.1, 4), (0.01, 8), (0.001, 10)]
-MODEL_PATH = "log/checkpoint-{epoch:02d}-{val_loss:.2f}.hdf5"
 
 def preprocess(x, y):
   x = tf.image.per_image_standardization(x)
@@ -57,11 +56,12 @@ tf.random.set_seed(22)
 train_loader = train_loader.map(augmentation).map(preprocess).shuffle(num_train_samples).batch(bs_per_gpu * num_gpus, drop_remainder=True)
 test_loader = test_loader.map(preprocess).batch(bs_per_gpu * num_gpus, drop_remainder=True)
 
+opt = keras.optimizers.SGD(learning_rate=0.1, momentum=0.9)
 
 if num_gpus == 1:
     model = resnet.resnet56(classes=num_classes)
     model.compile(
-              optimizer=keras.optimizers.SGD(learning_rate=0.1, momentum=0.9),
+              optimizer=opt,
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 else:
@@ -69,7 +69,7 @@ else:
     with mirrored_strategy.scope():
 	    model = resnet.resnet56(classes=num_classes)
 	    model.compile(
-                optimizer=keras.optimizers.SGD(learning_rate=0.1, momentum=0.9),
+                optimizer=opt,
 	              loss='sparse_categorical_crossentropy',
 	              metrics=['accuracy'])  
 
@@ -82,15 +82,12 @@ tensorboard_callback = TensorBoard(
   histogram_freq=1)
 
 lr_schedule_callback = keras.callbacks.LearningRateScheduler(schedule)
-ckpt_callback = keras.callbacks.ModelCheckpoint(
-  MODEL_PATH, monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-
 
 model.fit(train_loader,
           epochs=num_epochs,
           validation_data=test_loader,
           validation_freq=1,
-          callbacks=[tensorboard_callback, lr_schedule_callback, ckpt_callback])
+          callbacks=[tensorboard_callback, lr_schedule_callback])
 model.evaluate(test_loader)
 
 model.save('model.h5')
