@@ -18,10 +18,10 @@ num_classes = 10
 num_gpus = 2
 num_train_samples = 50000
 bs_per_gpu = 128
-num_epochs = 60
+num_epochs = 10
 
 BASE_LEARNING_RATE = 0.1
-LR_SCHEDULE = [(0.1, 30), (0.01, 45), (0.001, 60)]
+LR_SCHEDULE = [(0.1, 4), (0.01, 8), (0.001, 10)]
 
 
 def preprocess(x, y):
@@ -89,3 +89,9 @@ model.fit(train_loader,
           validation_freq=10,
           callbacks=[tensorboard_callback, lr_schedule_callback])
 model.evaluate(test_loader)
+
+model.save('model.h5')
+
+new_model = keras.models.load_model('model.h5')
+ 
+new_model.evaluate(test_loader)
