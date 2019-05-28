@@ -2,3 +2,4 @@ venv-tf2/*
 __pycache__/*
 *.h5
 logs/*
+log/*

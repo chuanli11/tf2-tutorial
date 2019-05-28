@@ -22,7 +22,7 @@ num_epochs = 10
 
 BASE_LEARNING_RATE = 0.1
 LR_SCHEDULE = [(0.1, 4), (0.01, 8), (0.001, 10)]
-
+MODEL_PATH = "log/checkpoint-{epoch:02d}-{val_loss:.2f}.hdf5"
 
 def preprocess(x, y):
   x = tf.image.per_image_standardization(x)
@@ -82,12 +82,15 @@ tensorboard_callback = TensorBoard(
   histogram_freq=1)
 
 lr_schedule_callback = keras.callbacks.LearningRateScheduler(schedule)
+ckpt_callback = keras.callbacks.ModelCheckpoint(
+  MODEL_PATH, monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
+
 
 model.fit(train_loader,
           epochs=num_epochs,
           validation_data=test_loader,
-          validation_freq=10,
-          callbacks=[tensorboard_callback, lr_schedule_callback])
+          validation_freq=1,
+          callbacks=[tensorboard_callback, lr_schedule_callback, ckpt_callback])
 model.evaluate(test_loader)
 
 model.save('model.h5')
