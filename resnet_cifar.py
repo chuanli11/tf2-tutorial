@@ -1,14 +1,11 @@
 import datetime
-import math 
 
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import models, layers, regularizers
 from tensorflow.keras.callbacks import TensorBoard
+
 import resnet
 
-from tensorflow.python.keras.optimizer_v2 import (gradient_descent as
-                                                  gradient_descent_v2)
 
 HEIGHT = 32
 WIDTH = 32
@@ -18,10 +15,10 @@ num_classes = 10
 num_gpus = 2
 num_train_samples = 50000
 bs_per_gpu = 128
-num_epochs = 10
+num_epochs = 60
 
 BASE_LEARNING_RATE = 0.1
-LR_SCHEDULE = [(0.1, 4), (0.01, 8), (0.001, 10)]
+LR_SCHEDULE = [(0.1, 30), (0.01, 45), (0.001, 60)]
 
 def preprocess(x, y):
   x = tf.image.per_image_standardization(x)
