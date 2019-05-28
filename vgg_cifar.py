@@ -186,7 +186,8 @@ else:
                 loss='sparse_categorical_crossentropy',
                 metrics=['accuracy']) 
 
-log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+# log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir="logs/fit/" + "resume"
 file_writer = tf.summary.create_file_writer(log_dir + "/metrics")
 file_writer.set_as_default()
 tensorboard_callback = TensorBoard(
