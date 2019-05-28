@@ -20,11 +20,11 @@ num_gpus = 2
 INIT_LR = 1e-3 
 num_train_samples = 50000
 bs_per_gpu = 128
-num_epochs = 40
+num_epochs = 60
 epochs_drop = 5.0
 
 BASE_LEARNING_RATE = 0.1
-LR_SCHEDULE = [(0.1, 20), (0.01, 30), (0.001, 40)]
+LR_SCHEDULE = [(0.1, 30), (0.01, 45), (0.001, 60)]
 
 
 def preprocess(x, y):
