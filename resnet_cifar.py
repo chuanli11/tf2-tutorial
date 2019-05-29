@@ -15,10 +15,10 @@ NUM_TRAIN_SAMPLES = 50000
 
 NUM_GPUS = 2
 BS_PER_GPU = 128
-NUM_EPOCHS = 60
+NUM_EPOCHS = 20
 
 BASE_LEARNING_RATE = 0.1
-LR_SCHEDULE = [(0.1, 30), (0.01, 45)]
+LR_SCHEDULE = [(0.1, 10), (0.01, 15)]
 
 def preprocess(x, y):
   x = tf.image.per_image_standardization(x)
