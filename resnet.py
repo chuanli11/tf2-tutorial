@@ -210,7 +210,7 @@ def resnet_block(input_tensor,
                                 block='block_%d' % (i + 1), training=training)
   return x
 
-def resnet(num_blocks, classes=10, training=None):
+def resnet(num_blocks, img_input=None, classes=10, training=None):
   """Instantiates the ResNet architecture.
 
   Arguments:
@@ -227,9 +227,6 @@ def resnet(num_blocks, classes=10, training=None):
   Returns:
     A Keras model instance.
   """
-
-  input_shape = (32, 32, 3)
-  img_input = layers.Input(shape=input_shape)
 
   if backend.image_data_format() == 'channels_first':
     x = layers.Lambda(lambda x: backend.permute_dimensions(x, (0, 3, 1, 2)),

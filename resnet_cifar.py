@@ -54,10 +54,13 @@ tf.random.set_seed(22)
 train_loader = train_loader.map(augmentation).map(preprocess).shuffle(NUM_TRAIN_SAMPLES).batch(BS_PER_GPU * NUM_GPUS, drop_remainder=True)
 test_loader = test_loader.map(preprocess).batch(BS_PER_GPU * NUM_GPUS, drop_remainder=True)
 
+
+input_shape = (32, 32, 3)
+img_input = tf.keras.layers.Input(shape=input_shape)
 opt = keras.optimizers.SGD(learning_rate=0.1, momentum=0.9)
 
 if NUM_GPUS == 1:
-    model = resnet.resnet56(classes=NUM_CLASSES)
+    model = resnet.resnet56(img_input=img_input, classes=NUM_CLASSES)
     model.compile(
               optimizer=opt,
               loss='sparse_categorical_crossentropy',
@@ -65,7 +68,7 @@ if NUM_GPUS == 1:
 else:
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
-	    model = resnet.resnet56(classes=NUM_CLASSES)
+	    model = resnet.resnet56(img_input=img_input, classes=NUM_CLASSES)
 	    model.compile(
                 optimizer=opt,
 	              loss='sparse_categorical_crossentropy',
