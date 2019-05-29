@@ -27,12 +27,16 @@ import functools
 import tensorflow as tf
 from tensorflow.python.keras import backend
 from tensorflow.python.keras import layers
+from tensorflow.keras import backend as K
 
+import BN16
 
 BATCH_NORM_DECAY = 0.997
 BATCH_NORM_EPSILON = 1e-5
 L2_WEIGHT_DECAY = 2e-4
 
+K.set_floatx('float16')
+K.set_epsilon(1e-4)
 
 def identity_building_block(input_tensor,
                             kernel_size,
@@ -76,6 +80,12 @@ def identity_building_block(input_tensor,
                                          momentum=BATCH_NORM_DECAY,
                                          epsilon=BATCH_NORM_EPSILON)(
                                              x, training=training)
+  # x = BN16.BatchNormalizationF16(axis=bn_axis,
+  #                                        name=bn_name_base + '2a',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)  
+  
   x = tf.keras.layers.Activation('relu')(x)
 
   x = tf.keras.layers.Conv2D(filters2, kernel_size,
@@ -91,6 +101,13 @@ def identity_building_block(input_tensor,
                                          momentum=BATCH_NORM_DECAY,
                                          epsilon=BATCH_NORM_EPSILON)(
                                              x, training=training)
+  # x = BN16.BatchNormalizationF16(axis=bn_axis,
+  #                                        name=bn_name_base + '2b',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
+
+
 
   x = tf.keras.layers.add([x, input_tensor])
   x = tf.keras.layers.Activation('relu')(x)
@@ -145,6 +162,14 @@ def conv_building_block(input_tensor,
                                          momentum=BATCH_NORM_DECAY,
                                          epsilon=BATCH_NORM_EPSILON)(
                                              x, training=training)
+  # x = BN16.BatchNormalizationF16(axis=bn_axis,
+  #                                        name=bn_name_base + '2a',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
+
+  
+
   x = tf.keras.layers.Activation('relu')(x)
 
   x = tf.keras.layers.Conv2D(filters2, kernel_size, padding='same',
@@ -159,6 +184,13 @@ def conv_building_block(input_tensor,
                                          momentum=BATCH_NORM_DECAY,
                                          epsilon=BATCH_NORM_EPSILON)(
                                              x, training=training)
+  # x = BN16.BatchNormalizationF16(axis=bn_axis,
+  #                                        name=bn_name_base + '2b',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
+
+  
 
   shortcut = tf.keras.layers.Conv2D(filters2, (1, 1), strides=strides,
                                     kernel_initializer='he_normal',
@@ -171,7 +203,11 @@ def conv_building_block(input_tensor,
       axis=bn_axis, name=bn_name_base + '1',
       momentum=BATCH_NORM_DECAY, epsilon=BATCH_NORM_EPSILON)(
           shortcut, training=training)
-
+  # shortcut = BN16.BatchNormalizationF16(
+  #     axis=bn_axis, name=bn_name_base + '1',
+  #     momentum=BATCH_NORM_DECAY, epsilon=BATCH_NORM_EPSILON)(
+  #         shortcut, training=training)
+  
   x = tf.keras.layers.add([x, shortcut])
   x = tf.keras.layers.Activation('relu')(x)
   return x
@@ -250,6 +286,10 @@ def resnet(num_blocks, img_input=None, classes=10, training=None):
                                          momentum=BATCH_NORM_DECAY,
                                          epsilon=BATCH_NORM_EPSILON)(
                                              x, training=training)
+  # x = BN16.BatchNormalizationF16(axis=bn_axis, name='bn_conv1',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)  
   x = tf.keras.layers.Activation('relu')(x)
 
   x = resnet_block(x, size=num_blocks, kernel_size=3, filters=[16, 16],

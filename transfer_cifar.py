@@ -11,7 +11,7 @@ NUM_CHANNELS = 3
 NUM_CLASSES = 10
 NUM_TRAIN_SAMPLES = 50000
 
-NUM_GPUS = 2
+NUM_GPUS = 1
 BS_PER_GPU = 128
 NUM_EPOCHS = 3
 
@@ -65,7 +65,8 @@ if NUM_GPUS == 1:
   model = resnet.resnet56(img_input=img_input, classes=NUM_CLASSES)
   model.load_weights('model.h5')
   model.trainable = False
-
+  feat = model.layers[-2].output
+ 
   if False:
     # Test the accuracy of restored model
     model.compile(
@@ -80,7 +81,7 @@ if NUM_GPUS == 1:
                               tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                               bias_regularizer=
                               tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
-                              name='fc10')(model.layers[-2].output)
+                              name='fc10')(feat)
   mymodel = tf.keras.models.Model(img_input, my_output, name='my')
   mymodel.compile(
             optimizer=opt,
@@ -92,6 +93,7 @@ else:
     model = resnet.resnet56(img_input=img_input, classes=NUM_CLASSES)
     model.load_weights('model.h5')
     model.trainable = False
+    feat = model.layers[-2].output
 
     if False:
       # Test the accuracy of restored model
@@ -107,7 +109,7 @@ else:
                                 tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                                 bias_regularizer=
                                 tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
-                                name='fc10')(model.layers[-2].output)
+                                name='fc10')(feat)
     mymodel = tf.keras.models.Model(img_input, my_output, name='my')
     mymodel.compile(
               optimizer=opt,
