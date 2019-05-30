@@ -19,7 +19,7 @@ NUM_CHANNELS = 3
 NUM_CLASSES = 10
 NUM_TRAIN_SAMPLES = 50000
 
-NUM_GPUS = 2
+NUM_GPUS = 1
 BS_PER_GPU = 128
 NUM_EPOCHS = 20
 
@@ -88,8 +88,7 @@ file_writer = tf.summary.create_file_writer(log_dir + "/metrics")
 file_writer.set_as_default()
 tensorboard_callback = TensorBoard(
   log_dir=log_dir,
-  update_freq='batch',
-  histogram_freq=1)
+  update_freq='batch')
 
 lr_schedule_callback = keras.callbacks.LearningRateScheduler(schedule)
 
