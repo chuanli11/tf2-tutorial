@@ -5,7 +5,7 @@ from tensorflow import keras
 from tensorflow.keras.callbacks import TensorBoard
 
 import resnet
-
+import vgg
 
 HEIGHT = 32
 WIDTH = 32
@@ -60,7 +60,7 @@ img_input = tf.keras.layers.Input(shape=input_shape)
 opt = keras.optimizers.SGD(learning_rate=0.1, momentum=0.9)
 
 if NUM_GPUS == 1:
-    model = resnet.resnetsmall(img_input=img_input, classes=NUM_CLASSES)
+    model = vgg.VGG16(img_input=img_input, classes=NUM_CLASSES)
     model.compile(
               optimizer=opt,
               loss='sparse_categorical_crossentropy',
@@ -68,7 +68,7 @@ if NUM_GPUS == 1:
 else:
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
-	    model = resnet.resnetsmall(img_input=img_input, classes=NUM_CLASSES)
+	    model = vgg.VGG16(img_input=img_input, classes=NUM_CLASSES)
 	    model.compile(
                 optimizer=opt,
 	              loss='sparse_categorical_crossentropy',

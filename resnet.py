@@ -35,8 +35,8 @@ BATCH_NORM_DECAY = 0.997
 BATCH_NORM_EPSILON = 1e-5
 L2_WEIGHT_DECAY = 2e-4
 
-K.set_floatx('float16')
-K.set_epsilon(1e-4)
+# K.set_floatx('float16')
+# K.set_epsilon(1e-4)
 
 def identity_building_block(input_tensor,
                             kernel_size,
@@ -75,11 +75,11 @@ def identity_building_block(input_tensor,
                              bias_regularizer=
                              tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                              name=conv_name_base + '2a')(input_tensor)
-  x = tf.keras.layers.BatchNormalization(axis=bn_axis,
-                                         name=bn_name_base + '2a',
-                                         momentum=BATCH_NORM_DECAY,
-                                         epsilon=BATCH_NORM_EPSILON)(
-                                             x, training=training)
+  # x = tf.keras.layers.BatchNormalization(axis=bn_axis,
+  #                                        name=bn_name_base + '2a',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
   # x = BN16.BatchNormalizationF16(axis=bn_axis,
   #                                        name=bn_name_base + '2a',
   #                                        momentum=BATCH_NORM_DECAY,
@@ -96,18 +96,16 @@ def identity_building_block(input_tensor,
                              bias_regularizer=
                              tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                              name=conv_name_base + '2b')(x)
-  x = tf.keras.layers.BatchNormalization(axis=bn_axis,
-                                         name=bn_name_base + '2b',
-                                         momentum=BATCH_NORM_DECAY,
-                                         epsilon=BATCH_NORM_EPSILON)(
-                                             x, training=training)
+  # x = tf.keras.layers.BatchNormalization(axis=bn_axis,
+  #                                        name=bn_name_base + '2b',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
   # x = BN16.BatchNormalizationF16(axis=bn_axis,
   #                                        name=bn_name_base + '2b',
   #                                        momentum=BATCH_NORM_DECAY,
   #                                        epsilon=BATCH_NORM_EPSILON)(
   #                                            x, training=training)
-
-
 
   x = tf.keras.layers.add([x, input_tensor])
   x = tf.keras.layers.Activation('relu')(x)
@@ -157,11 +155,11 @@ def conv_building_block(input_tensor,
                              bias_regularizer=
                              tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                              name=conv_name_base + '2a')(input_tensor)
-  x = tf.keras.layers.BatchNormalization(axis=bn_axis,
-                                         name=bn_name_base + '2a',
-                                         momentum=BATCH_NORM_DECAY,
-                                         epsilon=BATCH_NORM_EPSILON)(
-                                             x, training=training)
+  # x = tf.keras.layers.BatchNormalization(axis=bn_axis,
+  #                                        name=bn_name_base + '2a',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
   # x = BN16.BatchNormalizationF16(axis=bn_axis,
   #                                        name=bn_name_base + '2a',
   #                                        momentum=BATCH_NORM_DECAY,
@@ -179,11 +177,11 @@ def conv_building_block(input_tensor,
                              bias_regularizer=
                              tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                              name=conv_name_base + '2b')(x)
-  x = tf.keras.layers.BatchNormalization(axis=bn_axis,
-                                         name=bn_name_base + '2b',
-                                         momentum=BATCH_NORM_DECAY,
-                                         epsilon=BATCH_NORM_EPSILON)(
-                                             x, training=training)
+  # x = tf.keras.layers.BatchNormalization(axis=bn_axis,
+  #                                        name=bn_name_base + '2b',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
   # x = BN16.BatchNormalizationF16(axis=bn_axis,
   #                                        name=bn_name_base + '2b',
   #                                        momentum=BATCH_NORM_DECAY,
@@ -199,14 +197,14 @@ def conv_building_block(input_tensor,
                                     bias_regularizer=
                                     tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                                     name=conv_name_base + '1')(input_tensor)
-  shortcut = tf.keras.layers.BatchNormalization(
-      axis=bn_axis, name=bn_name_base + '1',
-      momentum=BATCH_NORM_DECAY, epsilon=BATCH_NORM_EPSILON)(
-          shortcut, training=training)
-  # shortcut = BN16.BatchNormalizationF16(
+  # shortcut = tf.keras.layers.BatchNormalization(
   #     axis=bn_axis, name=bn_name_base + '1',
   #     momentum=BATCH_NORM_DECAY, epsilon=BATCH_NORM_EPSILON)(
   #         shortcut, training=training)
+  shortcut = BN16.BatchNormalizationF16(
+      axis=bn_axis, name=bn_name_base + '1',
+      momentum=BATCH_NORM_DECAY, epsilon=BATCH_NORM_EPSILON)(
+          shortcut, training=training)
   
   x = tf.keras.layers.add([x, shortcut])
   x = tf.keras.layers.Activation('relu')(x)
@@ -282,10 +280,10 @@ def resnet(num_blocks, img_input=None, classes=10, training=None):
                              bias_regularizer=
                              tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                              name='conv1')(x)
-  x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn_conv1',
-                                         momentum=BATCH_NORM_DECAY,
-                                         epsilon=BATCH_NORM_EPSILON)(
-                                             x, training=training)
+  # x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn_conv1',
+  #                                        momentum=BATCH_NORM_DECAY,
+  #                                        epsilon=BATCH_NORM_EPSILON)(
+  #                                            x, training=training)
   # x = BN16.BatchNormalizationF16(axis=bn_axis, name='bn_conv1',
   #                                        momentum=BATCH_NORM_DECAY,
   #                                        epsilon=BATCH_NORM_EPSILON)(
@@ -316,8 +314,8 @@ def resnet(num_blocks, img_input=None, classes=10, training=None):
 
   return model
 
-
+resnetsmall = functools.partial(resnet, num_blocks=1)
 resnet20 = functools.partial(resnet, num_blocks=3)
 resnet32 = functools.partial(resnet, num_blocks=5)
 resnet56 = functools.partial(resnet, num_blocks=9)
-resnet10 = functools.partial(resnet, num_blocks=110)
+resnet110 = functools.partial(resnet, num_blocks=110)

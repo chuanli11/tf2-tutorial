@@ -4,8 +4,14 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.callbacks import TensorBoard
 
-import resnet
+from tensorflow.keras import backend as K
 
+
+import resnet
+import vgg
+
+K.set_floatx('float16')
+K.set_epsilon(1e-4)
 
 HEIGHT = 32
 WIDTH = 32
@@ -47,6 +53,9 @@ def schedule(epoch):
 
 (x,y), (x_test, y_test) = keras.datasets.cifar10.load_data()
 
+x = x.astype('float16')
+x_test = x_test.astype('float16')
+
 train_loader = tf.data.Dataset.from_tensor_slices((x,y))
 test_loader = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
@@ -60,7 +69,7 @@ img_input = tf.keras.layers.Input(shape=input_shape)
 opt = keras.optimizers.SGD(learning_rate=0.1, momentum=0.9)
 
 if NUM_GPUS == 1:
-    model = resnet.resnetsmall(img_input=img_input, classes=NUM_CLASSES)
+    model = vgg.VGG16(img_input=img_input, classes=NUM_CLASSES)
     model.compile(
               optimizer=opt,
               loss='sparse_categorical_crossentropy',
@@ -68,7 +77,7 @@ if NUM_GPUS == 1:
 else:
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
-	    model = resnet.resnetsmall(img_input=img_input, classes=NUM_CLASSES)
+	    model = vgg.VGG16(img_input=img_input, classes=NUM_CLASSES)
 	    model.compile(
                 optimizer=opt,
 	              loss='sparse_categorical_crossentropy',
