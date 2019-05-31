@@ -56,7 +56,7 @@ train_loader = train_loader.map(augmentation).map(preprocess).shuffle(NUM_TRAIN_
 test_loader = test_loader.map(preprocess).batch(BS_PER_GPU * NUM_GPUS, drop_remainder=True)
 
 
-input_shape = (32, 32, 3)
+input_shape = (HEIGHT, WIDTH, NUM_CHANNELS)
 img_input = tf.keras.layers.Input(shape=input_shape)
 opt = tf.keras.optimizers.SGD(learning_rate=0.1, momentum=0.9)
 
