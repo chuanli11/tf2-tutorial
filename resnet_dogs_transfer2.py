@@ -87,30 +87,42 @@ test_loader = test_loader.map(preprocess).batch(BS_PER_GPU * NUM_GPUS, drop_rema
 input_shape = (HEIGHT, WIDTH, 3)
 img_input = tf.keras.layers.Input(shape=input_shape)
 opt = keras.optimizers.RMSprop()
+
+
 if NUM_GPUS == 1:
-    model = applications.ResNet50(weights = "imagenet", include_top=False, input_shape = (WIDTH, HEIGHT, NUM_CHANNELS))
+    model = keras.models.load_model('ResNet50.h5')
     model.trainable = False
-    x = model.output
+    x = model.layers[-3].output
     my_output = tf.keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
-    my_output = tf.keras.layers.Dense(NUM_CLASSES, activation='softmax',
+    my_output = tf.keras.layers.Dropout(0.5)(my_output)
+    my_output = tf.keras.layers.Dense(640,
                                 kernel_initializer='he_normal',
                                 kernel_regularizer=
                                 tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                                 bias_regularizer=
                                 tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                                 name='fc10')(my_output)
+    my_output = tf.keras.layers.BatchNormalization()(my_output)
+    my_output = tf.keras.layers.Activation("relu", name='myactivation')(my_output)
+    my_output = tf.keras.layers.Dropout(0.5)(my_output)
+    my_output = tf.keras.layers.Dense(NUM_CLASSES, activation='softmax',
+                                kernel_initializer='he_normal',
+                                kernel_regularizer=
+                                tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
+                                bias_regularizer=
+                                tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
+                                name='prediction')(my_output)      
     mymodel = tf.keras.models.Model(model.input, my_output, name='my')
     mymodel.compile(
               optimizer=opt,
               loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])    
+              metrics=['accuracy'])  
 else:
     mirrored_strategy = tf.distribute.MirroredStrategy()
-    with mirrored_strategy.scope():  
-      model = applications.ResNet50(weights = "imagenet", include_top=False, input_shape = (WIDTH, HEIGHT, NUM_CHANNELS))
+    with mirrored_strategy.scope():
+      model = keras.models.load_model('ResNet50.h5')
       model.trainable = False
-      x = model.output
-
+      x = model.layers[-3].output
       my_output = tf.keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
       my_output = tf.keras.layers.Dropout(0.5)(my_output)
       my_output = tf.keras.layers.Dense(640,
@@ -121,7 +133,7 @@ else:
                                   tf.keras.regularizers.l2(L2_WEIGHT_DECAY),
                                   name='fc10')(my_output)
       my_output = tf.keras.layers.BatchNormalization()(my_output)
-      my_output = tf.keras.layers.Activation("relu")(my_output)
+      my_output = tf.keras.layers.Activation("relu", name='myactivation')(my_output)
       my_output = tf.keras.layers.Dropout(0.5)(my_output)
       my_output = tf.keras.layers.Dense(NUM_CLASSES, activation='softmax',
                                   kernel_initializer='he_normal',
