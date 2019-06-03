@@ -8,8 +8,13 @@ model = ResNet50(weights='imagenet')
 img_path = 'cat.jpg'
 img = image.load_img(img_path, target_size=(224, 224))
 x = image.img_to_array(img)
-x = np.expand_dims(x, axis=0)
+# x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
+print(x.shape)
+print(np.max(x))
+import sys
+sys.exit()
+
 
 preds = model.predict(x)
 # decode the results into a list of tuples (class, description, probability)

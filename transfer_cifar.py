@@ -48,6 +48,11 @@ def schedule(epoch):
 
 (x,y), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
+x = x[0:NUM_TRAIN_SAMPLES, :]
+y = y[0:NUM_TRAIN_SAMPLES]
+x_test = x_test[0:NUM_TRAIN_SAMPLES, :]
+y_test = y_test[0:NUM_TRAIN_SAMPLES]
+
 train_loader = tf.data.Dataset.from_tensor_slices((x,y))
 test_loader = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
